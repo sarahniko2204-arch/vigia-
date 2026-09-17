@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigía — Control ciudadano del gasto público</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#4A5563;
+    --paper:#F6F5F1;
+    --paper-raised:#FFFFFF;
+    --primary:#1E5F5A;
+    --primary-dark:#123D3A;
+    --gold:#B4901F;
+    --alert:#A83226;
+    --alert-bg:#F7E7E4;
+    --ok:#2B6E4F;
+    --ok-bg:#E6F0E9;
+    --line:#DAD6C9;
+    --line-soft:#E8E5DA;
+    --shadow: 0 1px 2px rgba(27,36,48,.06);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ink:#EDEAE0;
+      --ink-soft:#B7B2A3;
+      --paper:#15181C;
+      --paper-raised:#1D2126;
+      --primary:#4FA89E;
+      --primary-dark:#2E6F68;
+      --gold:#D8B84A;
+      --alert:#E17061;
+      --alert-bg:#3A2320;
+      --ok:#6FBF95;
+      --ok-bg:#1E2E25;
+      --line:#33383F;
+      --line-soft:#282D33;
+      --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDEAE0;
+    --ink-soft:#B7B2A3;
+    --paper:#15181C;
+    --paper-raised:#1D2126;
+    --primary:#4FA89E;
+    --primary-dark:#2E6F68;
+    --gold:#D8B84A;
+    --alert:#E17061;
+    --alert-bg:#3A2320;
+    --ok:#6FBF95;
+    --ok-bg:#1E2E25;
+    --line:#33383F;
+    --line-soft:#282D33;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:600;
+    margin:0;
+    color:var(--ink);
+  }
+  a{color:var(--primary);}
+  .mono{font-family:'IBM Plex Mono', ui-monospace, monospace;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+  img,svg{max-width:100%;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    background:var(--primary-dark);
+    color:#F3F1E7;
+    border-bottom:4px solid var(--gold);
+  }
+  .masthead-top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 0;
+    border-bottom:1px solid rgba(255,255,255,.14);
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Source Serif 4',serif;font-weight:700;font-size:18px;
+    color:var(--gold);
+    flex-shrink:0;
+  }
+  .brand-name{font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;letter-spacing:.2px;}
+  .brand-sub{font-size:12.5px;color:#CBD3CE;margin-top:1px;}
+  .masthead-nav{display:flex;gap:22px;font-size:14.5px;flex-wrap:wrap;}
+  .masthead-nav a{color:#DCE3DD;text-decoration:none;padding:4px 0;border-bottom:2px solid transparent;}
+  .masthead-nav a:hover{border-bottom-color:var(--gold);color:#fff;}
+
+  .hero{padding:56px 0 44px;}
+  .hero-kicker{
+    font-size:13.5px;color:#BFE3DA;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .hero-kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);}
+  .hero h1{font-size:clamp(28px,4.2vw,44px);line-height:1.14;color:#fff;max-width:16ch;}
+  .hero p{font-size:16.5px;color:#D6DDD5;max-width:56ch;margin-top:16px;}
+
+  .search-box{
+    margin-top:28px;background:var(--paper-raised);
+    border-radius:8px;padding:6px;display:flex;gap:6px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    max-width:640px;
+  }
+  .search-box input{
+    flex:1;border:none;background:transparent;padding:12px 14px;
+    font-size:15px;color:var(--ink);font-family:inherit;
+  }
+  .search-box input:focus{outline:none;}
+  .search-box button{
+    background:var(--gold);border:none;color:#241B04;font-weight:600;
+    padding:0 22px;border-radius:5px;cursor:pointer;font-size:14.5px;font-family:inherit;
+  }
+  .search-box button:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:2px solid var(--gold);outline-offset:2px;
+  }
+
+  /* ---------- KPI strip ---------- */
+  .kpi-strip{background:var(--paper-raised);border-bottom:1px solid var(--line);}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+  .kpi{padding:22px 20px;border-right:1px solid var(--line-soft);}
+  .kpi:last-child{border-right:none;}
+  .kpi .num{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--primary);}
+  .kpi .num.alert{color:var(--alert);}
+  .kpi .label{font-size:13px;color:var(--ink-soft);margin-top:4px;}
+
+  @media (max-width:760px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .kpi:nth-child(2){border-right:none;}
+    .kpi{border-bottom:1px solid var(--line-soft);}
+  }
+
+  section{padding:56px 0;}
+  .section-head{margin-bottom:28px;max-width:70ch;}
+  .section-head .eyebrow{font-size:13px;color:var(--gold);margin-bottom:8px;}
+  .section-head h2{font-size:26px;}
+  .section-head p{color:var(--ink-soft);margin-top:10px;font-size:15px;}
+
+  /* ---------- disclaimer banner ---------- */
+  .notice{
+    background:var(--ok-bg);border:1px solid var(--ok);border-left-width:4px;
+    padding:14px 18px;border-radius:4px;font-size:14px;color:var(--ink);margin-bottom:26px;
+  }
+  .notice b{color:var(--ok);}
+
+  /* ---------- filters ---------- */
+  .filters{
+    display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;
+    padding:14px;background:var(--paper-raised);border:1px solid var(--line);border-radius:6px;
+  }
+  .filters select, .filters input[type=text]{
+    font-family:inherit;font-size:14px;padding:8px 10px;border-radius:4px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  }
+  .filters .count{margin-left:auto;font-size:13px;color:var(--ink-soft);align-self:center;}
+
+  /* ---------- ledger table ---------- */
+  .ledger{border-top:1px solid var(--line);}
+  .row{
+    display:grid;
+    grid-template-columns:64px 1fr 150px 150px 110px 28px;
+    gap:14px;align-items:center;
+    padding:16px 14px;border-bottom:1px solid var(--line-soft);
+    cursor:pointer;background:var(--paper-raised);
+    transition:background .12s;
+  }
+  .row:hover{background:var(--line-soft);}
+  .row .n{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink-soft);}
+  .row .title{font-size:14.5px;font-weight:500;}
+  .row .meta{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .row .amount{font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:right;}
+  .row .amount .sub{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .row .caret{font-size:18px;color:var(--ink-soft);text-align:center;}
+  .flag{
+    font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:20px;
+    display:inline-block;white-space:nowrap;
+  }
+  .flag.alta{background:var(--alert-bg);color:var(--alert);}
+  .flag.media{background:#FBF0DC;color:var(--gold);}
+  :root[data-theme="dark"] .flag.media, :root:not([data-theme="light"]) .flag.media{ }
+  .flag.ok{background:var(--ok-bg);color:var(--ok);}
+
+  @media (max-width:740px){
+    .row{grid-template-columns:1fr 30px;grid-template-areas:"main caret" "amount amount";}
+    .row .n{display:none;}
+    .row .title,.row .meta{grid-column:1;}
+    .row .amount{grid-column:1;text-align:left;margin-top:8px;}
+    .row .caret{grid-row:1;}
+  }
+
+  /* ---------- detail panel (dialog) ---------- */
+  .veil{
+    position:fixed;inset:0;background:rgba(10,14,12,.55);
+    display:none;align-items:flex-start;justify-content:center;
+    padding:32px 16px;overflow-y:auto;z-index:50;
+  }
+  .veil.open{display:flex;}
+  .detail{
+    background:var(--paper-raised);max-width:760px;width:100%;
+    border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+    margin-top:24px;
+  }
+  .detail-head{
+    padding:26px 28px 20px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;gap:16px;
+  }
+  .detail-head h3{font-size:21px;line-height:1.3;max-width:46ch;}
+  .detail-head .meta-line{font-size:13px;color:var(--ink-soft);margin-top:8px;}
+  .close-btn{
+    border:none;background:var(--line-soft);width:32px;height:32px;border-radius:50%;
+    font-size:16px;cursor:pointer;color:var(--ink);flex-shrink:0;
+  }
+  .detail-body{padding:24px 28px 30px;}
+  .detail-body h4{font-size:13px;text-transform:none;color:var(--gold);margin-bottom:8px;letter-spacing:.2px;}
+  .detail-block{margin-bottom:24px;}
+  .detail-block p{font-size:14.5px;color:var(--ink);margin:0;}
+
+  .compare{margin-top:10px;}
+  .compare-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .compare-label{width:130px;font-size:12.5px;color:var(--ink-soft);flex-shrink:0;}
+  .compare-track{flex:1;background:var(--line-soft);border-radius:4px;height:22px;position:relative;overflow:hidden;}
+  .compare-fill{height:100%;border-radius:4px;}
+  .compare-fill.market{background:var(--ok);}
+  .compare-fill.paid{background:var(--alert);}
+  .compare-value{width:150px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;flex-shrink:0;}
+
+  .timeline{border-left:2px solid var(--line);margin-left:6px;padding-left:20px;}
+  .tl-item{position:relative;padding-bottom:16px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:"";position:absolute;left:-25.5px;top:4px;width:9px;height:9px;
+    border-radius:50%;background:var(--primary);
+  }
+  .tl-date{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+  .tl-event{font-size:14px;margin-top:2px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:600px){.grid2{grid-template-columns:1fr;}}
+
+  /* ---------- featured case ---------- */
+  .case-band{background:var(--primary-dark);color:#F3F1E7;}
+  .case-band .eyebrow{color:var(--gold);}
+  .case-band .section-head h2{color:#fff;}
+  .case-band .section-head p{color:#CBD3CE;}
+  .case-card{
+    background:var(--paper-raised);color:var(--ink);border-radius:8px;
+    padding:30px;box-shadow:0 12px 34px rgba(0,0,0,.25);
+  }
+  .case-card h3{font-size:22px;margin-bottom:6px;}
+  .case-card .tag{
+    display:inline-block;background:var(--alert-bg);color:var(--alert);
+    font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:14px;
+  }
+  .case-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0;}
+  .case-nums div{padding:14px;background:var(--paper);border:1px solid var(--line);border-radius:6px;}
+  .case-nums .n{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;color:var(--alert);}
+  .case-nums .l{font-size:12px;color:var(--ink-soft);margin-top:3px;}
+  @media (max-width:600px){.case-nums{grid-template-columns:1fr;}}
+  .case-card .btn{
+    display:inline-block;margin-top:6px;background:var(--primary);color:#fff;
+    padding:11px 20px;border-radius:5px;text-decoration:none;font-size:14.5px;font-weight:500;
+    border:none;cursor:pointer;font-family:inherit;
+  }
+  .sources{font-size:12.5px;color:var(--ink-soft);margin-top:16px;}
+
+  /* ---------- methodology ---------- */
+  .method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px;}
+  @media (max-width:800px){.method-grid{grid-template-columns:1fr;}}
+  .method-card{padding:20px;border:1px solid var(--line);border-radius:6px;background:var(--paper-raised);}
+  .method-card .step{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);margin-bottom:8px;}
+  .method-card h4{font-size:15.5px;margin-bottom:6px;font-family:'IBM Plex Sans';font-weight:600;}
+  .method-card p{font-size:13.5px;color:var(--ink-soft);margin:0;}
+
+  .fine-print{
+    margin-top:30px;padding:18px 20px;border:1px dashed var(--line);border-radius:6px;
+    font-size:13.5px;color:var(--ink-soft);
+  }
+  .fine-print b{color:var(--ink);}
+
+  /* ---------- participation ---------- */
+  .channels{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px;}
+  @media (max-width:800px){.channels{grid-template-columns:1fr;}}
+  .channel{padding:20px;border:1px solid var(--line);border-radius:6px;background:var(--paper-raised);}
+  .channel h4{font-size:15px;margin-bottom:6px;}
+  .channel .val{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--primary);margin:4px 0;}
+  .channel p{font-size:13px;color:var(--ink-soft);margin:4px 0 0;}
+
+  footer{
+    border-top:1px solid var(--line);padding:34px 0;font-size:13px;color:var(--ink-soft);
+  }
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+
+  .skip-link{
+    position:absolute;left:-999px;top:0;background:var(--gold);color:#241B04;
+    padding:10px 16px;z-index:100;
+  }
+  .skip-link:focus{left:16px;top:16px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<a href="#buscador" class="skip-link">Saltar al buscador de gastos</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-top">
+      <div class="brand">
+        <div class="brand-mark">V</div>
+        <div>
+          <div class="brand-name">Vigía</div>
+          <div class="brand-sub">Control ciudadano del gasto público · prototipo nacional</div>
+        </div>
+      </div>
+      <nav class="masthead-nav">
+        <a href="#buscador">Buscar gastos</a>
+        <a href="#caso">Caso UNGRD</a>
+        <a href="#metodologia">Cómo funciona</a>
+        <a href="#participar">Denunciar</a>
+      </nav>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-kicker"><span class="dot"></span> Cubrimiento pensado para los 32 departamentos y el nivel nacional</div>
+      <h1>Cada peso público, explicado en lenguaje sencillo.</h1>
+      <p>Vigía muestra qué se contrató, cómo se hizo, cuánto costó, de dónde salió el dinero y si el precio pagado se ajusta al del mercado — para que cualquier persona, sin importar su formación, pueda vigilar el gasto del Estado.</p>
+      <form class="search-box" onsubmit="event.preventDefault(); document.getElementById('buscar-input').value=document.getElementById('hero-input').value; filtrar(); document.getElementById('buscador').scrollIntoView({behavior:'smooth'});">
+        <input id="hero-input" type="text" placeholder="Busca por entidad, contrato o departamento — ej: “carrotanques”, “Salud Chocó”…">
+        <button type="submit">Buscar</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<div class="kpi-strip">
+  <div class="wrap kpi-grid">
+    <div class="kpi"><div class="num" id="kpi-total">$0</div><div class="label">Gasto público registrado en esta muestra</div></div>
+    <div class="kpi"><div class="num alert" id="kpi-alertas">0</div><div class="label">Contratos con alerta de posible sobrecosto</div></div>
+    <div class="kpi"><div class="num" id="kpi-ahorro">$0</div><div class="label">Diferencia frente a precio de mercado estimado</div></div>
+    <div class="kpi"><div class="num" id="kpi-entidades">0</div><div class="label">Entidades y departamentos representados</div></div>
+  </div>
+</div>
+
+<main>
+<div class="wrap">
+  <div class="notice">
+    <b>Esto es un prototipo funcional</b>, no una fuente oficial. Los registros que ves abajo son de ejemplo para mostrar cómo se vería la herramienta, con una excepción marcada: el caso de los carrotanques de la UNGRD usa cifras reportadas por prensa y entes de control. Al final de la página se explica qué se necesitaría para conectar la herramienta a datos reales y verificados. <a href="#metodologia">Ver cómo funcionaría con datos reales →</a>
+  </div>
+</div>
+
+<section id="buscador">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Registro de gastos</div>
+      <h2>Busca y filtra el gasto público</h2>
+      <p>Cada fila es un contrato o desembolso. Ábrelo para ver el detalle completo: objeto, proceso, fuente del dinero, comparación de precios y resultado.</p>
+    </div>
+
+    <div class="filters">
+      <input type="text" id="buscar-input" placeholder="Buscar por palabra clave…" oninput="filtrar()">
+      <select id="filtro-categoria" onchange="filtrar()">
+        <option value="">Todas las categorías</option>
+      </select>
+      <select id="filtro-depto" onchange="filtrar()">
+        <option value="">Todos los departamentos</option>
+      </select>
+      <select id="filtro-alerta" onchange="filtrar()">
+        <option value="">Todas las alertas</option>
+        <option value="alta">Alerta alta</option>
+        <option value="media">Alerta media</option>
+        <option value="ok">Sin alerta</option>
+      </select>
+      <span class="count" id="result-count"></span>
+    </div>
+
+    <div class="ledger" id="ledger"></div>
+  </div>
+</section>
+
+<section class="case-band" id="caso">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Caso documentado</div>
+      <h2>Los carrotanques de la UNGRD, explicados</h2>
+      <p>Así se vería una ficha completa aplicada a un caso real ya investigado por la Contraloría y la Procuraduría: qué se compró, cuánto costó frente al mercado y qué pasó después.</p>
+    </div>
+    <div class="case-card">
+      <span class="tag">Bajo investigación de entes de control</span>
+      <h3>Compra de 40 carrotanques para llevar agua a La Guajira (2023–2024)</h3>
+      <p style="color:var(--ink-soft);font-size:14.5px;max-width:70ch;">La Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD) contrató camiones cisterna para atender la emergencia por sequía en La Guajira. Investigaciones periodísticas y de los organismos de control encontraron diferencias muy grandes entre lo pagado y el precio de mercado de vehículos equivalentes.</p>
+
+      <div class="case-nums">
+        <div><div class="n mono">$46.800M</div><div class="l">Valor total del contrato reportado por la UNGRD</div></div>
+        <div><div class="n mono">$1.170M</div><div class="l">Valor pagado por cada carrotanque, según la entidad</div></div>
+        <div><div class="n mono">~$20.000M</div><div class="l">Sobrecosto estimado por investigaciones periodísticas</div></div>
+      </div>
+
+      <button class="btn" onclick="abrirDetalle('ungrd')">Ver ficha completa del caso →</button>
+      <div class="sources">Cifras según reportes de La W Radio, El Espectador y Vanguardia, e investigaciones de la Contraloría General de la República y la Procuraduría General de la Nación (2024). En un despliegue real, cada cifra enlazaría a su documento fuente en SECOP o el expediente del ente de control.</div>
+    </div>
+  </div>
+</section>
+
+<section id="metodologia">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Cómo funcionaría</div>
+      <h2>De prototipo a herramienta nacional</h2>
+      <p>Para que Vigía funcione de verdad, a escala nacional y con datos actualizados, cada ficha necesitaría alimentarse automáticamente de fuentes públicas ya existentes en Colombia, en vez de la información de ejemplo que ves hoy.</p>
+    </div>
+    <div class="method-grid">
+      <div class="method-card">
+        <div class="step">Contratación</div>
+        <h4>SECOP I y II</h4>
+        <p>Colombia Compra Eficiente publica cada proceso de contratación pública: proponentes, valor, modalidad y documentos del contrato.</p>
+      </div>
+      <div class="method-card">
+        <div class="step">Presupuesto</div>
+        <h4>Ministerio de Hacienda y DNP</h4>
+        <p>El Presupuesto General de la Nación y el Sistema General de Regalías muestran de qué bolsillo del Estado sale cada peso.</p>
+      </div>
+      <div class="method-card">
+        <div class="step">Datos abiertos</div>
+        <h4>datos.gov.co</h4>
+        <p>El portal nacional de datos abiertos centraliza conjuntos de datos de cientos de entidades en formatos reutilizables.</p>
+      </div>
+      <div class="method-card">
+        <div class="step">Control fiscal</div>
+        <h4>Contraloría General</h4>
+        <p>Aporta hallazgos, investigaciones y alertas sobre posibles irregularidades o sobrecostos ya confirmados.</p>
+      </div>
+      <div class="method-card">
+        <div class="step">Comparación de precios</div>
+        <h4>SIPRI / catálogos de precios de referencia</h4>
+        <p>Un banco de precios de mercado —por tipo de bien o servicio y por región— permitiría calcular automáticamente si un contrato luce sobrevalorado.</p>
+      </div>
+      <div class="method-card">
+        <div class="step">Verificación</div>
+        <h4>Periodismo y veedurías</h4>
+        <p>Alianzas con medios y organizaciones de la sociedad civil ayudarían a confirmar hallazgos antes de mostrar una alerta como confirmada.</p>
+      </div>
+    </div>
+
+    <div class="fine-print">
+      <b>Honestidad sobre el alcance:</b> esta página es un demo interactivo construido en una sola sesión de trabajo; no está conectada a ninguna base de datos oficial en tiempo real. Construir la versión real exigiría acuerdos de acceso a datos con las entidades mencionadas, un equipo que verifique cada alerta antes de publicarla, e infraestructura capaz de actualizarse a diario y de resistir el volumen de tráfico de un uso nacional. Es exactamente el tipo de proyecto que suele nacer de una alianza entre una veeduría ciudadana, la academia y medios de comunicación.
+    </div>
+  </div>
+</section>
+
+<section id="participar" style="background:var(--paper-raised);border-top:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Participación ciudadana</div>
+      <h2>Canales oficiales para denunciar hoy mismo</h2>
+      <p>Mientras una herramienta como esta se construye, ya existen canales reales del Estado colombiano para reportar posibles irregularidades. Verifica siempre los datos vigentes en el sitio oficial de cada entidad, porque pueden actualizarse.</p>
+    </div>
+    <div class="channels">
+      <div class="channel">
+        <h4>Línea Anticorrupción 157</h4>
+        <div class="val">157</div>
+        <p>Línea nacional para reportar posibles hechos de corrupción, coordinada con Policía, Procuraduría y Fiscalía.</p>
+      </div>
+      <div class="channel">
+        <h4>Contraloría General de la República</h4>
+        <div class="val">denuncie.contraloria.gov.co</div>
+        <p>Denuncias sobre el manejo de recursos y bienes públicos por parte de cualquier entidad del Estado.</p>
+      </div>
+      <div class="channel">
+        <h4>Procuraduría General de la Nación</h4>
+        <div class="val">procuraduria.gov.co</div>
+        <p>Quejas y denuncias disciplinarias contra servidores públicos, a través del portal de PQRSDF.</p>
+      </div>
+      <div class="channel">
+        <h4>SECOP — Colombia Compra Eficiente</h4>
+        <div class="val">secop.colombiacompra.gov.co</div>
+        <p>Consulta pública de todos los procesos de contratación estatal vigentes e históricos.</p>
+      </div>
+      <div class="channel">
+        <h4>Fiscalía General de la Nación</h4>
+        <div class="val">122</div>
+        <p>Línea para denunciar delitos, incluidos los relacionados con el patrimonio público.</p>
+      </div>
+      <div class="channel">
+        <h4>Datos Abiertos Colombia</h4>
+        <div class="val">datos.gov.co</div>
+        <p>Portal nacional donde las entidades públicas publican sus bases de datos en formato abierto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>Vigía es un prototipo educativo de herramienta de control ciudadano. No es un canal oficial del Estado colombiano.</div>
+    <div>Construido como demostración · datos de ejemplo salvo donde se indica lo contrario</div>
+  </div>
+</footer>
+
+<div class="veil" id="veil" onclick="if(event.target===this) cerrarDetalle()">
+  <div class="detail" role="dialog" aria-modal="true" aria-labelledby="detalle-titulo">
+    <div class="detail-head">
+      <div>
+        <h3 id="detalle-titulo"></h3>
+        <div class="meta-line" id="detalle-meta"></div>
+      </div>
+      <button class="close-btn" onclick="cerrarDetalle()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="detail-body" id="detalle-body"></div>
+  </div>
+</div>
+
+<script>
+const fmt = n => '$' + n.toLocaleString('es-CO');
+const fmtM = n => '$' + (n/1000000).toLocaleString('es-CO',{maximumFractionDigits:0}) + 'M';
+
+const DATA = [
+  {
+    id:'ungrd', entidad:'Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD)',
+    categoria:'Emergencias', departamento:'La Guajira', estado:'Bajo investigación',
+    titulo:'Compra de 40 carrotanques para atender la emergencia por sequía',
+    fechaInicio:'2023-11', montoContratado:46800000000, precioMercado:26576000000,
+    fuente:'Presupuesto General de la Nación — Fondo Nacional de Gestión del Riesgo de Desastres',
+    modalidad:'Contratación directa por declaratoria de urgencia manifiesta',
+    contratista:'Unión temporal contratista privado (identidad establecida en el expediente de la Contraloría)',
+    que:'40 camiones cisterna (carrotanques) para transportar agua potable a comunidades de La Guajira afectadas por la sequía, en el marco de una declaratoria de emergencia.',
+    como:'La UNGRD usó la figura de urgencia manifiesta, que permite saltarse el proceso normal de licitación pública para atender la emergencia más rápido. Esa misma figura hizo más difícil comparar precios antes de firmar.',
+    resultado:'La Contraloría y la Procuraduría abrieron investigaciones fiscales y disciplinarias. El director y dos subdirectores de la entidad salieron de sus cargos. Los carrotanques quedaron parqueados sin operar durante meses por falta de pólizas de seguro, y solo empezaron a funcionar en diciembre de 2024, más de un año después de comprados.',
+    alerta:'alta',
+    timeline:[
+      {fecha:'Nov 2023', evento:'La UNGRD declara la urgencia manifiesta y contrata los carrotanques.'},
+      {fecha:'Feb 2024', evento:'Medios reportan diferencias entre el precio pagado y cotizaciones de mercado.'},
+      {fecha:'Feb–Mar 2024', evento:'Contraloría cita a versión libre a directivos de la UNGRD; el director y un subdirector renuncian.'},
+      {fecha:'2024', evento:'Procuraduría formula pliego de cargos por presuntos sobrecostos.'},
+      {fecha:'Dic 2024', evento:'Los carrotanques obtienen pólizas y entran en operación en La Guajira.'},
+    ]
+  },
+  {
+    id:'g2', entidad:'Secretaría de Salud Departamental', categoria:'Salud', departamento:'Chocó',
+    estado:'En ejecución', titulo:'Suministro de equipos de refrigeración para cadena de frío de vacunas',
+    fechaInicio:'2025-03', montoContratado:1850000000, precioMercado:1620000000,
+    fuente:'Sistema General de Participaciones (SGP) — Salud',
+    modalidad:'Licitación pública', contratista:'Proveedor de equipos biomédicos (persona jurídica)',
+    que:'38 neveras y congeladores especializados para conservar vacunas en centros de salud rurales.',
+    como:'Proceso licitatorio abierto con al menos tres oferentes; el contrato incluye instalación, capacitación y mantenimiento por dos años.',
+    resultado:'Entrega parcial completada en el 60% de los centros de salud priorizados; el resto se entregará antes de fin de año.',
+    alerta:'media',
+    timeline:[
+      {fecha:'Ene 2025', evento:'Apertura de la licitación pública.'},
+      {fecha:'Mar 2025', evento:'Firma del contrato con el proveedor seleccionado.'},
+      {fecha:'Jun 2025', evento:'Primera entrega de equipos a 40 centros de salud.'},
+    ]
+  },
+  {
+    id:'g3', entidad:'Instituto Nacional de Vías (Invías)', categoria:'Infraestructura', departamento:'Nariño',
+    estado:'En ejecución', titulo:'Mantenimiento de 22 km de vía terciaria',
+    fechaInicio:'2024-08', montoContratado:8200000000, precioMercado:7900000000,
+    fuente:'Presupuesto General de la Nación — Invías',
+    modalidad:'Licitación pública', contratista:'Consorcio Vial (persona jurídica)',
+    que:'Mejoramiento de la carpeta de rodadura y obras de drenaje en una vía terciaria que conecta zonas rurales con la cabecera municipal.',
+    como:'Contrato de obra pública con interventoría independiente contratada por separado para vigilar avance y calidad.',
+    resultado:'Avance físico del 45% a la fecha, dentro del cronograma previsto.',
+    alerta:'ok',
+    timeline:[
+      {fecha:'Ago 2024', evento:'Inicio de obras.'},
+      {fecha:'Feb 2025', evento:'Interventoría reporta avance del 30%, sin observaciones mayores.'},
+    ]
+  },
+  {
+    id:'g4', entidad:'Unidad Administrativa Especial de Aeronáutica Civil', categoria:'Infraestructura', departamento:'Nivel nacional',
+    estado:'Terminado', titulo:'Adquisición de equipos de radar para control aéreo',
+    fechaInicio:'2023-05', montoContratado:34500000000, precioMercado:34000000000,
+    fuente:'Recursos propios de la entidad (tasas aeroportuarias)',
+    modalidad:'Licitación pública internacional', contratista:'Fabricante internacional de equipos de navegación aérea',
+    que:'Dos sistemas de radar para modernizar el control de tránsito aéreo en aeropuertos regionales.',
+    como:'Proceso internacional con especificaciones técnicas estrictas por tratarse de seguridad aérea; participaron tres fabricantes reconocidos.',
+    resultado:'Equipos instalados y operando; certificación técnica satisfactoria.',
+    alerta:'ok',
+    timeline:[
+      {fecha:'May 2023', evento:'Adjudicación del contrato.'},
+      {fecha:'Nov 2023', evento:'Entrega e instalación de los equipos.'},
+      {fecha:'Feb 2024', evento:'Certificación de operación satisfactoria.'},
+    ]
+  },
+  {
+    id:'g5', entidad:'Alcaldía Municipal', categoria:'Educación', departamento:'Córdoba',
+    estado:'En ejecución', titulo:'Dotación de mobiliario escolar para 12 instituciones educativas',
+    fechaInicio:'2025-01', montoContratado:1240000000, precioMercado:790000000,
+    fuente:'Sistema General de Participaciones (SGP) — Educación',
+    modalidad:'Contratación directa (mínima cuantía fraccionada)', contratista:'Distribuidor local de mobiliario',
+    que:'Pupitres, tableros y sillas para 12 sedes educativas rurales.',
+    como:'El contrato se dividió en varios pedidos pequeños que, sumados, superan el valor que habría exigido un proceso competitivo — una práctica que la Contraloría suele revisar de cerca.',
+    resultado:'Entregas parciales realizadas; la Personería municipal abrió una revisión preliminar por la fragmentación del contrato.',
+    alerta:'alta',
+    timeline:[
+      {fecha:'Ene 2025', evento:'Primeros pedidos de mobiliario.'},
+      {fecha:'Abr 2025', evento:'Personería municipal solicita explicaciones sobre la fragmentación del contrato.'},
+    ]
+  },
+  {
+    id:'g6', entidad:'Ministerio de Ambiente y Desarrollo Sostenible', categoria:'Ambiente', departamento:'Amazonas',
+    estado:'En ejecución', titulo:'Monitoreo satelital de deforestación',
+    fechaInicio:'2024-11', montoContratado:5600000000, precioMercado:5400000000,
+    fuente:'Cooperación internacional (fondo de conservación) + Presupuesto General de la Nación',
+    modalidad:'Convenio de cooperación', contratista:'Centro de investigación ambiental (entidad sin ánimo de lucro)',
+    que:'Sistema de alertas tempranas de deforestación basado en imágenes satelitales para la región amazónica.',
+    como:'Convenio cofinanciado entre el Estado y un fondo internacional de conservación; incluye contrapartida técnica del Ministerio.',
+    resultado:'Sistema de alertas operando en fase piloto en cuatro departamentos amazónicos.',
+    alerta:'ok',
+    timeline:[
+      {fecha:'Nov 2024', evento:'Firma del convenio de cooperación.'},
+      {fecha:'Mar 2025', evento:'Inicio de la fase piloto de alertas.'},
+    ]
+  },
+  {
+    id:'g7', entidad:'Policía Nacional', categoria:'Seguridad', departamento:'Valle del Cauca',
+    estado:'Terminado', titulo:'Compra de chalecos antibalas para unidades de patrullaje',
+    fechaInicio:'2024-02', montoContratado:2100000000, precioMercado:1350000000,
+    fuente:'Presupuesto General de la Nación — Ministerio de Defensa',
+    modalidad:'Contratación directa por seguridad nacional', contratista:'Proveedor de equipos de seguridad (persona jurídica)',
+    que:'420 chalecos antibalas de nivel III-A para unidades de patrullaje urbano.',
+    como:'Contratación directa justificada en razones de seguridad nacional, lo que redujo la cantidad de oferentes que compitieron por el contrato.',
+    resultado:'Entrega completa a las unidades; un ente de control regional inició una revisión sobre el precio unitario pagado.',
+    alerta:'media',
+    timeline:[
+      {fecha:'Feb 2024', evento:'Firma del contrato.'},
+      {fecha:'Abr 2024', evento:'Entrega de los chalecos a las unidades.'},
+      {fecha:'Ago 2024', evento:'Ente de control regional inicia revisión del precio unitario.'},
+    ]
+  },
+  {
+    id:'g8', entidad:'Empresa de Acueducto Municipal', categoria:'Infraestructura', departamento:'Magdalena',
+    estado:'Suspendido', titulo:'Construcción de planta de tratamiento de agua potable',
+    fechaInicio:'2022-06', montoContratado:12300000000, precioMercado:10800000000,
+    fuente:'Sistema General de Regalías', modalidad:'Licitación pública',
+    contratista:'Constructora regional (persona jurídica)',
+    que:'Nueva planta de tratamiento de agua potable para abastecer a tres corregimientos.',
+    como:'Obra financiada con regalías del departamento; el proceso incluyó estudios previos y diseño técnico contratados por separado.',
+    resultado:'Obra suspendida al 55% de avance por incumplimientos del contratista; el municipio adelanta el proceso para hacer efectiva la póliza de cumplimiento.',
+    alerta:'alta',
+    timeline:[
+      {fecha:'Jun 2022', evento:'Inicio de obras.'},
+      {fecha:'Sep 2023', evento:'Interventoría reporta atrasos significativos.'},
+      {fecha:'Ene 2024', evento:'Suspensión formal del contrato por incumplimiento.'},
+    ]
+  },
+  {
+    id:'g9', entidad:'Instituto Colombiano de Bienestar Familiar (ICBF)', categoria:'Salud', departamento:'Nivel nacional',
+    estado:'En ejecución', titulo:'Suministro de alimentación escolar complementaria',
+    fechaInicio:'2025-02', montoContratado:210000000000, precioMercado:198000000000,
+    fuente:'Presupuesto General de la Nación', modalidad:'Licitación pública por regiones',
+    contratista:'Varios operadores regionales', que:'Raciones de alimentación complementaria para niñas, niños y adolescentes en zonas de alta vulnerabilidad.',
+    como:'Contratación fraccionada por región para facilitar la operación logística, con interventorías independientes en cada zona.',
+    resultado:'Cobertura del 82% de la meta anual de beneficiarios a la fecha.',
+    alerta:'media',
+    timeline:[
+      {fecha:'Feb 2025', evento:'Adjudicación por regiones.'},
+      {fecha:'May 2025', evento:'Primer corte de cobertura reportado.'},
+    ]
+  },
+  {
+    id:'g10', entidad:'Gobernación', categoria:'Infraestructura', departamento:'Boyacá',
+    estado:'Terminado', titulo:'Reparación de puente vehicular sobre el río Chicamocha',
+    fechaInicio:'2023-09', montoContratado:3400000000, precioMercado:3300000000,
+    fuente:'Regalías directas del departamento', modalidad:'Licitación pública',
+    contratista:'Constructora regional', que:'Reparación estructural de un puente vehicular tras daños por una creciente del río.',
+    como:'Obra de emergencia pero con proceso competitivo, al no calificar como urgencia manifiesta según el concepto técnico previo.',
+    resultado:'Puente reabierto al tráfico vehicular en el tiempo previsto, sin observaciones de la interventoría.',
+    alerta:'ok',
+    timeline:[
+      {fecha:'Sep 2023', evento:'Inicio de la reparación.'},
+      {fecha:'Ene 2024', evento:'Reapertura del puente.'},
+    ]
+  }
+];
+
+function alertaLabel(a){
+  return a==='alta' ? 'Alerta alta' : a==='media' ? 'Alerta media' : 'Sin alerta';
+}
+
+function poblarFiltros(){
+  const cats = [...new Set(DATA.map(d=>d.categoria))].sort();
+  const deptos = [...new Set(DATA.map(d=>d.departamento))].sort();
+  const selCat = document.getElementById('filtro-categoria');
+  const selDep = document.getElementById('filtro-depto');
+  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; selCat.appendChild(o); });
+  deptos.forEach(d=>{ const o=document.createElement('option'); o.value=d; o.textContent=d; selDep.appendChild(o); });
+}
+
+function renderKPIs(rows){
+  const total = rows.reduce((s,d)=>s+d.montoContratado,0);
+  const dif = rows.reduce((s,d)=>s+Math.max(0,d.montoContratado-d.precioMercado),0);
+  const alertas = rows.filter(d=>d.alerta==='alta').length;
+  const entidades = new Set(rows.map(d=>d.entidad+d.departamento)).size;
+  document.getElementById('kpi-total').textContent = fmtM(total);
+  document.getElementById('kpi-alertas').textContent = alertas;
+  document.getElementById('kpi-ahorro').textContent = fmtM(dif);
+  document.getElementById('kpi-entidades').textContent = entidades;
+}
+
+function renderLedger(rows){
+  const el = document.getElementById('ledger');
+  el.innerHTML = '';
+  document.getElementById('result-count').textContent = rows.length + (rows.length===1 ? ' resultado' : ' resultados');
+  if(rows.length===0){
+    el.innerHTML = '<div style="padding:40px 14px;text-align:center;color:var(--ink-soft);font-size:14.5px;">No hay registros que coincidan con la búsqueda. Prueba con otra palabra o quita un filtro.</div>';
+    return;
+  }
+  rows.forEach((d,i)=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.tabIndex = 0;
+    row.setAttribute('role','button');
+    row.onclick = ()=>abrirDetalle(d.id);
+    row.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); abrirDetalle(d.id);} };
+    row.innerHTML = `
+      <div class="n">${String(i+1).padStart(2,'0')}</div>
+      <div>
+        <div class="title">${d.titulo}</div>
+        <div class="meta">${d.entidad} · ${d.departamento} · ${d.categoria}</div>
+      </div>
+      <div><span class="flag ${d.alerta}">${alertaLabel(d.alerta)}</span></div>
+      <div class="meta" style="font-size:12.5px;">${d.estado}</div>
+      <div class="amount">${fmtM(d.montoContratado)}<span class="sub">contratado</span></div>
+      <div class="caret">›</div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+function filtrar(){
+  const q = document.getElementById('buscar-input').value.toLowerCase().trim();
+  const cat = document.getElementById('filtro-categoria').value;
+  const dep = document.getElementById('filtro-depto').value;
+  const al = document.getElementById('filtro-alerta').value;
+  const rows = DATA.filter(d=>{
+    const text = (d.titulo+' '+d.entidad+' '+d.departamento+' '+d.categoria).toLowerCase();
+    if(q && !text.includes(q)) return false;
+    if(cat && d.categoria!==cat) return false;
+    if(dep && d.departamento!==dep) return false;
+    if(al && d.alerta!==al) return false;
+    return true;
+  });
+  renderKPIs(rows);
+  renderLedger(rows);
+}
+
+function abrirDetalle(id){
+  const d = DATA.find(x=>x.id===id);
+  if(!d) return;
+  document.getElementById('detalle-titulo').textContent = d.titulo;
+  document.getElementById('detalle-meta').textContent = `${d.entidad} · ${d.departamento} · ${d.estado} · desde ${d.fechaInicio}`;
+
+  const maxVal = Math.max(d.montoContratado, d.precioMercado);
+  const pctPaid = Math.round((d.montoContratado/maxVal)*100);
+  const pctMarket = Math.round((d.precioMercado/maxVal)*100);
+  const diff = d.montoContratado - d.precioMercado;
+  const diffPct = Math.round((diff/d.precioMercado)*100);
+
+  document.getElementById('detalle-body').innerHTML = `
+    <div class="detail-block">
+      <span class="flag ${d.alerta}">${alertaLabel(d.alerta)}</span>
+    </div>
+
+    <div class="grid2">
+      <div class="detail-block">
+        <h4>Qué se contrató</h4>
+        <p>${d.que}</p>
+      </div>
+      <div class="detail-block">
+        <h4>Cómo se hizo</h4>
+        <p>${d.como}</p>
+      </div>
+    </div>
+
+    <div class="detail-block">
+      <h4>De dónde salió el dinero</h4>
+      <p><b>Fuente:</b> ${d.fuente} &nbsp;·&nbsp; <b>Modalidad:</b> ${d.modalidad} &nbsp;·&nbsp; <b>Contratista:</b> ${d.contratista}</p>
+    </div>
+
+    <div class="detail-block">
+      <h4>Comparación con precio de mercado</h4>
+      <div class="compare">
+        <div class="compare-row">
+          <div class="compare-label">Precio pagado</div>
+          <div class="compare-track"><div class="compare-fill paid" style="width:${pctPaid}%"></div></div>
+          <div class="compare-value">${fmtM(d.montoContratado)}</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-label">Estimado de mercado</div>
+          <div class="compare-track"><div class="compare-fill market" style="width:${pctMarket}%"></div></div>
+          <div class="compare-value">${fmtM(d.precioMercado)}</div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:13.5px;color:${diff>0?'var(--alert)':'var(--ok)'}">
+        ${diff>0
+          ? `Se pagó ${fmtM(diff)} (${diffPct}%) por encima del estimado de mercado.`
+          : `El valor contratado está en línea con —o por debajo de— el estimado de mercado.`}
+      </p>
+    </div>
+
+    <div class="detail-block">
+      <h4>Línea de tiempo del proceso</h4>
+      <div class="timeline">
+        ${d.timeline.map(t=>`<div class="tl-item"><div class="tl-date">${t.fecha}</div><div class="tl-event">${t.evento}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-block" style="margin-bottom:0;">
+      <h4>Resultado</h4>
+      <p>${d.resultado}</p>
+    </div>
+  `;
+
+  document.getElementById('veil').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function cerrarDetalle(){
+  document.getElementById('veil').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarDetalle(); });
+
+poblarFiltros();
+filtrar();
+</script>
+</body>
+</html>
